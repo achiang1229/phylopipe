@@ -1,11 +1,11 @@
-# PhyloPipe
+# Cladewise
 
 A lightweight, automated pipeline for constructing phylogenetic trees
 from orthologous gene sequences.
 
 ## Overview
 
-PhyloPipe takes preformatted FASTA files containing orthologous sequences
+Cladewise takes preformatted FASTA files containing orthologous sequences
 across multiple species and produces publication-ready phylogenetic trees
 with minimal user configuration. The pipeline is built around three
 well-established tools: MAFFT for multiple sequence alignment, chosen for
@@ -16,7 +16,7 @@ selection via ModelFinder and computes both SH-aLRT and ultrafast bootstrap
 support values (1000 replicates each), making it robust across a wide variety
 of input data.
 
-PhyloPipe is designed for users who want sensible, well-supported phylogenetic
+Cladewise is designed for users who want sensible, well-supported phylogenetic
 trees without manually tuning parameters at each step. While some familiarity
 with phylogenetics is helpful for interpreting results, no deep bioinformatics
 expertise is required to run the pipeline. Note that in the current version,
@@ -25,7 +25,7 @@ from NCBI is planned for a future release.
 
 ## Pipeline Workflow
 
-PhyloPipe runs the following steps in order, orchestrated by Snakemake:
+Cladewise runs the following steps in order, orchestrated by Snakemake:
 
 1. **Header reformatting** — sequence headers are standardized to
    `Genus_species_accession` format
@@ -62,7 +62,7 @@ output tree (.png)
 
 ## Dependencies
 
-PhyloPipe requires the following tools:
+Cladewise requires the following tools:
 
 - **Snakemake** (9.19.0) — workflow orchestration
 - **MAFFT** (7.526) — multiple sequence alignment
@@ -73,7 +73,7 @@ PhyloPipe requires the following tools:
 - **PyQt6** — required by ETE4 for image rendering
 
 > **Windows users:** ETE4 does not support native Windows installation.
-> Please use the Windows Subsystem for Linux (WSL) to run PhyloPipe.
+> Please use the Windows Subsystem for Linux (WSL) to run Cladewise.
 > Installation and usage instructions are otherwise identical to Linux.
 
 All dependencies can be installed by reproducing the provided Conda
@@ -81,7 +81,7 @@ environment:
 
 ```bash
 conda env create -f environment.yaml
-conda activate phylopipe
+conda activate cladewise
 ```
 
 A `environment.yaml` file is included in the repository for full
@@ -92,15 +92,15 @@ reproducibility.
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/achiang1229/phylopipe.git
-cd phylopipe
+git clone https://github.com/achiang1229/cladewise.git
+cd cladewise
 ```
 
 ### 2. Set up the Conda environment
 
 ```bash
 conda env create -f environment.yaml
-conda activate phylopipe
+conda activate cladewise
 ```
 
 ### 3. Add your input files
@@ -109,7 +109,7 @@ Place one or more FASTA files containing orthologous sequences in the
 `data/` directory:
 
 ```
-phylopipe/
+cladewise/
 ├── data/
 │   └── your_sequences.fasta
 ├── scripts/
@@ -134,7 +134,7 @@ shown above, or the pipeline will fail to parse the config correctly.
 
 ### 5. Run the pipeline
 
-From the `phylopipe/` directory:
+From the `cladewise/` directory:
 
 ```bash
 snakemake --cores 4
@@ -160,7 +160,7 @@ IQ-TREE files) are written to `cleaned/`, `aligned/`, `trimmed/`, and
 
 ## Configuration
 
-PhyloPipe is configured via `config.yaml` in the root directory.
+Cladewise is configured via `config.yaml` in the root directory.
 
 | Key | Type | Description |
 |---|---|---|
@@ -182,7 +182,7 @@ descriptive error message listing the valid options.
 
 ## Output Files
 
-For each input file `data/{name}.fasta`, PhyloPipe produces the following
+For each input file `data/{name}.fasta`, Cladewise produces the following
 outputs:
 
 | File | Description |
@@ -218,7 +218,7 @@ The expected output is a rendered tree at `tree/formicidae_coi.png`.
 
 ## Notes and Limitations
 
-- **Input format:** PhyloPipe expects input sequences to be orthologous
+- **Input format:** Cladewise expects input sequences to be orthologous
   and in standard FASTA format. Sequences do not need to be pre-aligned.
   Multi-gene or whole-genome datasets are not currently supported.
 
@@ -251,12 +251,12 @@ The expected output is a rendered tree at `tree/formicidae_coi.png`.
   automated sequence retrieval is planned for a future release.
 
 - **Windows compatibility:** ETE4 does not currently support native
-  Windows installation. Windows users are recommended to run PhyloPipe
+  Windows installation. Windows users are recommended to run Cladewise
   via the Windows Subsystem for Linux (WSL), which provides a compatible
   Linux environment. Installation and usage instructions are otherwise
   identical to Linux. Native Windows support is not planned for the
-  foreseeable future as it is a limitation of ETE4, not PhyloPipe.
+  foreseeable future as it is a limitation of ETE4, not Cladewise.
 
-- **macOS compatibility:** PhyloPipe has not been explicitly tested on
+- **macOS compatibility:** Cladewise has not been explicitly tested on
   macOS. It is expected to work in principle, but compatibility is not
   guaranteed.

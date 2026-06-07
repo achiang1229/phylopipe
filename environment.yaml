@@ -1,4 +1,4 @@
-name: phylopipe
+name: cladewise
 channels:
   - bioconda
   - conda-forge
