@@ -1,0 +1,6 @@
+cleaned/
+aligned/
+trimmed/
+tree/
+logs/
+.snakemake/
