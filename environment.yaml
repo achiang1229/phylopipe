@@ -10,4 +10,4 @@ dependencies:
   - iqtree=3.1.1
   - ete4=4.3.0
   - biopython=1.87
-  - pyqt
+  - pyqt6

@@ -12,8 +12,9 @@ well-established tools: MAFFT for multiple sequence alignment, chosen for
 its balance of speed and accuracy and its flexible --auto mode; trimAl for
 alignment trimming, chosen for its lightweight performance on large datasets;
 and IQ-TREE 3 for tree inference, which features automatic best-fit model
-selection via ModelFinder, making it robust across a wide variety of input
-data. Bootstrap support values are planned for a future version.
+selection via ModelFinder and computes both SH-aLRT and ultrafast bootstrap
+support values (1000 replicates each), making it robust across a wide variety
+of input data.
 
 PhyloPipe is designed for users who want sensible, well-supported phylogenetic
 trees without manually tuning parameters at each step. While some familiarity
@@ -28,12 +29,13 @@ PhyloPipe runs the following steps in order, orchestrated by Snakemake:
 
 1. **Header reformatting** — sequence headers are standardized to
    `Genus_species_accession` format
-2. **Config validation** — outgroup names are resolved and verified
-   before any computation begins
-3. **Alignment** — sequences are aligned with MAFFT
-4. **Trimming** — poorly aligned regions are removed with trimAl
-5. **Tree inference** — a maximum likelihood tree is inferred with IQ-TREE 3
-6. **Visualization** — the final tree is rendered locally with ETE4 as a PNG
+2. **Alignment** — the outgroup is validated and sequences are aligned
+   with MAFFT
+3. **Trimming** — poorly aligned regions are removed with trimAl
+4. **Tree inference** — a maximum likelihood tree is inferred with IQ-TREE 3,
+   including SH-aLRT and ultrafast bootstrap support values (1000 replicates
+   each) and automatic thread detection
+5. **Visualization** — the final tree is rendered locally with ETE4 as a PNG
 
 ```
 input FASTA(s)
@@ -42,10 +44,8 @@ input FASTA(s)
 reformat_headers
       │
       ▼
-validate_config
-      │
-      ▼
 mafft_align
+(outgroup validated here)
       │
       ▼
 trimal_trim
@@ -70,8 +70,11 @@ PhyloPipe requires the following tools:
 - **IQ-TREE 3** (3.1.1) — maximum likelihood tree inference
 - **ETE4** (4.3.0) — tree visualization
 - **Biopython** (1.87) — sequence parsing and header reformatting
-- **PyQt6** — required by ETE4 for image rendering; install via the
-  `pyqt` package on conda-forge
+- **PyQt6** — required by ETE4 for image rendering
+
+> **Windows users:** ETE4 does not support native Windows installation.
+> Please use the Windows Subsystem for Linux (WSL) to run PhyloPipe.
+> Installation and usage instructions are otherwise identical to Linux.
 
 All dependencies can be installed by reproducing the provided Conda
 environment:
@@ -134,8 +137,13 @@ shown above, or the pipeline will fail to parse the config correctly.
 From the `phylopipe/` directory:
 
 ```bash
-snakemake --cores 1
+snakemake --cores 4
 ```
+
+`--cores 4` is a sensible default for most machines. Increase this value
+for faster performance on machines with more available cores, or use
+`--cores all` to utilize all available cores when the machine is
+dedicated to the task.
 
 ### 6. Output
 
@@ -148,8 +156,7 @@ tree/your_sequences.png
 
 Intermediate outputs (cleaned FASTA, alignment, trimmed alignment, and
 IQ-TREE files) are written to `cleaned/`, `aligned/`, `trimmed/`, and
-`tree/` respectively. A list of valid outgroup names for each input is
-available at `logs/your_sequences_labels.txt` if needed.
+`tree/` respectively.
 
 ## Configuration
 
@@ -171,8 +178,7 @@ Outgroup values must be enclosed in quotation marks as shown above.
 Outgroup names are matched against sequence headers case-insensitively.
 Both spaces and underscores are accepted. If the specified name matches
 multiple sequences or no sequences, the pipeline will exit with a
-descriptive error message and a pointer to
-`logs/{input_name}_labels.txt` for valid options.
+descriptive error message listing the valid options.
 
 ## Output Files
 
@@ -188,8 +194,6 @@ outputs:
 | `tree/{name}.iqtree` | Full IQ-TREE report including best-fit model, substitution rate parameters, base frequencies, and tree statistics — recommended reading for users who want to understand the analysis in depth |
 | `tree/{name}.log` | IQ-TREE runtime log |
 | `tree/{name}.png` | Rendered tree image |
-| `logs/{name}_labels.txt` | List of valid outgroup names for this input |
-| `logs/{name}_validated.flag` | Internal Snakemake flag confirming successful config validation |
 
 ## Test Data
 
@@ -207,7 +211,7 @@ outgroup:
 Then run:
 
 ```bash
-snakemake --cores 1
+snakemake --cores 4
 ```
 
 The expected output is a rendered tree at `tree/formicidae_coi.png`.
@@ -237,16 +241,22 @@ The expected output is a rendered tree at `tree/formicidae_coi.png`.
   on single-locus datasets. Performance on highly divergent or incomplete
   datasets has not been formally evaluated.
 
-- **Bootstrap support values:** Branch support values are not displayed
-  in the current version. Ultrafast bootstrap analysis (1000 replicates)
-  is planned for a future release, along with updated tree visualization.
+- **Branch support values:** Each internal node displays both SH-aLRT and
+  ultrafast bootstrap support values in `SH-aLRT/UFBoot` format (e.g.
+  `97.1/99`). A branch is generally considered well-supported when
+  SH-aLRT ≥ 80 and UFBoot ≥ 95.
 
 - **Automated sequence fetching:** Users are currently expected to supply
   their own FASTA files. Integration with the NCBI Entrez API for
   automated sequence retrieval is planned for a future release.
 
-- **Headless rendering:** Tree rendering via ETE4 requires PyQt6, which
-  should be installed via the `pyqt` package on conda-forge. On headless
-  systems without a display, rendering may require `xvfb-run` — in that
-  case, replace the `render_tree` shell command in the Snakefile with:
-  `xvfb-run python scripts/render_tree.py {input} {output}`
+- **Windows compatibility:** ETE4 does not currently support native
+  Windows installation. Windows users are recommended to run PhyloPipe
+  via the Windows Subsystem for Linux (WSL), which provides a compatible
+  Linux environment. Installation and usage instructions are otherwise
+  identical to Linux. Native Windows support is not planned for the
+  foreseeable future as it is a limitation of ETE4, not PhyloPipe.
+
+- **macOS compatibility:** PhyloPipe has not been explicitly tested on
+  macOS. It is expected to work in principle, but compatibility is not
+  guaranteed.
